@@ -48,7 +48,7 @@
 ;;; defcleanup
 
 (defmacro defcleanup (class cleanup-fun)
-  `(defmethod garbage-pools:object-register ((object ,class) &optional (pool *pool*))
+  `(defmethod garbage-pools:object-register ((object ,class) &optional (pool garbage-pools::*pool*))
      (garbage-pools:cleanup-register object ,cleanup-fun pool)))
 
 (defcleanup pool #'cleanup-pool)
