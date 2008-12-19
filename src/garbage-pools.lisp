@@ -33,6 +33,15 @@
         (funcall (cdr pair) (car pair)))
     (delete pair (register-pairs pool))))
 
+;;; cancel-cleanup
+
+(defun cancel-object-cleanup (object &optional (pool *pool*))
+  (let ((pair (iter (for cleanup-pair in (register-pairs pool))
+                    (finding cleanup-pair such-that (eq object (car cleanup-pair))))))
+    (if pair
+        (delete pair (register-pairs pool)))))
+  
+
 ;;; with-garbage-pool
 
 (defmacro with-garbage-pool ((&optional (var '*pool*)) &body body)
