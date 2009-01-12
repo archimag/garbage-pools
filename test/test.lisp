@@ -1,7 +1,7 @@
 ;; test.lisp
 
 (defpackage :garbage-pools.test
-  (:use #:cl #:garbage-pools #:lift #:iter)
+  (:use #:cl #:garbage-pools #:lift)
   (:nicknames #:gp.test)
   (:export #:run-garbage-pools-tests))
 
@@ -17,8 +17,8 @@
   (ensure-same '(1 2 3 4)
                (let ((list nil)
                      (pool (make-instance 'pool)))
-                 (iter (for x from 1 to 4)
-                       (cleanup-register x (lambda (obj) (push obj list)) pool))
+                 (loop for x from 1 to 4 do
+                      (cleanup-register x (lambda (obj) (push obj list)) pool))
                  (cleanup-pool pool)
                  list)))
 
@@ -29,8 +29,8 @@
   (ensure-same '(1 2 3 4 5)
                (let ((list nil))
                  (with-garbage-pool ()
-                   (iter (for x from 1 to 5)
-                         (cleanup-register x (lambda (obj) (push obj list)))))
+                   (loop for x from 1 to 5 do
+                        (cleanup-register x (lambda (obj) (push obj list)))))
                  list)))
 
 ;;; test-with-cleanup-pool-2
@@ -40,8 +40,8 @@
   (ensure-same '(1 2 3 4 5)
                (let ((list nil))
                  (with-garbage-pool (mypool)
-                   (iter (for x from 1 to 5)
-                         (cleanup-register x (lambda (obj) (push obj list)) mypool)))
+                   (loop for x from 1 to 5 do
+                        (cleanup-register x (lambda (obj) (push obj list)) mypool)))
                  list)))
 
 ;;; test-cleanup-object-1
@@ -53,8 +53,8 @@
                      (res2 nil)
                      (data '((0 . 0) (1 . 1) (2 . 2) (3 . 3) (4 . 4))))
                  (with-garbage-pool ()
-                   (iter (for x in data)
-                         (cleanup-register x (lambda (obj) (push obj res))))
+                   (loop for x in data do
+                        (cleanup-register x (lambda (obj) (push obj res))))
                    (cleanup-object (nth 1 data))
                    (cleanup-object (nth 3 data))
                    (setq res2 res)
@@ -69,8 +69,8 @@
                (let ((res nil)
                      (data '((0 . 0) (1 . 1) (2 . 2) (3 . 3) (4 . 4))))
                  (with-garbage-pool ()
-                   (iter (for x in data)
-                         (cleanup-register x (lambda (obj) (push obj res))))
+                   (loop for x in data do
+                        (cleanup-register x (lambda (obj) (push obj res))))
                    (cleanup-object (nth 1 data))
                    (cleanup-object (nth 3 data))
                    (setq res nil))

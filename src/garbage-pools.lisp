@@ -1,5 +1,17 @@
 ;; garbage-pools.lisp
 
+(defpackage :garbage-pools
+  (:use #:cl)
+  (:nicknames #:gp)
+  (:export #:pool
+           #:with-garbage-pool
+           #:cleanup-register
+           #:cleanup-pool
+           #:cleanup-object
+           #:cancel-object-cleanup
+           #:object-register
+           #:defcleanup))
+
 (in-package #:garbage-pools)
 
 (defvar *pool*)
@@ -19,16 +31,17 @@
 ;;; cleanup-pool
 
 (defun cleanup-pool (&optional (pool *pool*))
-  (iter (for (obj . cleanup-fun) in (register-pairs pool))
-        (if (and obj cleanup-fun)
-            (funcall cleanup-fun obj)))
-  (setf (register-pairs pool) nil))
+  (dolist (pair (register-pairs pool))
+    (let ((obj (car pair))
+          (cleanup-fun (cdr pair)))
+      (if (and obj cleanup-fun)
+          (funcall cleanup-fun obj)))
+    (setf (register-pairs pool) nil)))
 
 ;;; cleanup-object
 
 (defun cleanup-object (object &optional (pool *pool*))
-  (let ((pair (iter (for cleanup-pair in (register-pairs pool))
-                    (finding cleanup-pair such-that (eq object (car cleanup-pair))))))
+  (let ((pair (find object (register-pairs pool) :key #'car :test #'eq)))
     (if (and pair (car pair) (cdr pair))
         (funcall (cdr pair) (car pair)))
     (delete pair (register-pairs pool))))
@@ -36,8 +49,7 @@
 ;;; cancel-cleanup
 
 (defun cancel-object-cleanup (object &optional (pool *pool*))
-  (let ((pair (iter (for cleanup-pair in (register-pairs pool))
-                    (finding cleanup-pair such-that (eq object (car cleanup-pair))))))
+  (let ((pair (find object (register-pairs pool) :key #'car :test #'eq)))
     (if pair
         (delete pair (register-pairs pool)))))
   
