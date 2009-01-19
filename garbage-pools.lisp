@@ -66,6 +66,10 @@
 
 (defgeneric object-register (object &optional pool))
 
+(defmethod object-register ((empty (eql nil)) &optional (pool garbage-pools::*pool*))
+  (declare (ignore pool)))
+  
+
 ;;; defcleanup
 
 (defmacro defcleanup (class cleanup-fun)
