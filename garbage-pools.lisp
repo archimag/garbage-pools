@@ -2,7 +2,6 @@
 
 (defpackage :garbage-pools
   (:use #:cl)
-  (:nicknames #:gp)
   (:export #:pool
            #:with-garbage-pool
            #:cleanup-register
